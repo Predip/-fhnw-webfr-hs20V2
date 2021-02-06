@@ -21,17 +21,23 @@ public class BasicServlet extends HttpServlet {
 	 * could be a problem. THIS VERSION IS NOT PRODUCTION READY!
 	 */
 	private QuestionnaireRepository questionnaireRepository;
+	private static final String PAGETITLE = "<html><head><title>Example</title></head><body>";
+	private static final String PAGEEND = "</body></html>";
+	private PrintWriter writer;
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		response.setContentType("text/html; charset=utf-8");
-
 		String[] pathElements = request.getRequestURI().split("/");
-	if (isLastPathElementQuestionnaires(pathElements)) {
-			handleQuestionnairesRequest(request, response);
-		} else {
-			handleIndexRequest(request, response);
-		}
+
+		try {
+			setWriter(response);
+			writer.append(PAGETITLE);
+			if (isLastPathElementQuestionnaires(pathElements)) handleQuestionnairesRequest(request, response);
+			else if (isLastPathElementQuestions(pathElements)) handleQuestionsRequest(pathElements[pathElements.length - 1]);
+			else handleIndexRequest(request, response);
+			writer.append(PAGEEND);
+		} catch (IOException e) { System.err.println("IO Exception: "+e); }
 	}
 
 	private boolean isLastPathElementQuestionnaires(String[] pathElements) {
@@ -39,34 +45,55 @@ public class BasicServlet extends HttpServlet {
 		return last.equals("questionnaires");
 	}
 
-	private void handleQuestionnairesRequest(HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
+	private boolean isLastPathElementQuestions(String[] pathElements) {
+		String questionPath = pathElements[pathElements.length - 2];
+		if (questionPath.equals("questionnaires")) {
+			String last = pathElements[pathElements.length - 1];
+			if (last == null) return false;
+			try {
+				List<Questionnaire> questionnaires = questionnaireRepository.findAll();
+				Long id = Long.parseLong(last);
+				return id <= questionnaires.size() && id >= 0;
+			} catch (NullPointerException | NumberFormatException nfe) { return false; }
+		}
+		return false;
+	}
+
+	private void handleQuestionnairesRequest(HttpServletRequest request, HttpServletResponse response) {
 		List<Questionnaire> questionnaires = questionnaireRepository.findAll();
-		PrintWriter writer = response.getWriter();
-		writer.append("<html><head><title>Example</title></head><body>");
 		writer.append("<h3>Frageb&ouml;gen</h3>");
 		for (Questionnaire questionnaire : questionnaires) {
 			String url = request.getContextPath() + request.getServletPath();
 			url = url + "/questionnaires/" + questionnaire.getId().toString();
 			writer.append("<p><a href='" + response.encodeURL(url) + "'>" + questionnaire.getTitle() + "</a></p>");
 		}
-		writer.append("</body></html>");
 	}
 
-	private void handleIndexRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		PrintWriter writer = response.getWriter();
-		writer.append("<html><head><title>Example</title></head><body>");
+	private void handleQuestionsRequest(String pathElement) {
+		Questionnaire question = questionnaireRepository.findById(Long.parseLong(pathElement));
+		writer.append("<h3>Question</h3>");
+		if (question != null) {
+			writer.append("<h4>"+question.getTitle()+"</h4>");
+			writer.append("<p>"+question.getDescription()+"</p>");
+		} else writer.append("<p>no questions found</p>");
+	}
+
+	private void handleIndexRequest(HttpServletRequest request, HttpServletResponse response) {
 		writer.append("<h3>Welcome</h3>");
 		String url = request.getContextPath() + request.getServletPath();
 		writer.append("<p><a href='" + response.encodeURL(url) + "/questionnaires'>All Questionnaires</a></p>");
-		writer.append("</body></html>");
 	}
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		questionnaireRepository = new QuestionnaireInitializer().initRepoWithTestData();
+	}
 
+	public PrintWriter getWriter() { return writer; }
+
+	public void setWriter(HttpServletResponse response) throws IOException {
+		this.writer = response.getWriter();
 	}
 
 }
