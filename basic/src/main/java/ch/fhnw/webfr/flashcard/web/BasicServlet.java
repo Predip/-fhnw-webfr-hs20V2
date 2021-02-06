@@ -6,15 +6,16 @@ import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import ch.fhnw.webfr.flashcard.domain.Questionnaire;
 import ch.fhnw.webfr.flashcard.persistence.QuestionnaireRepository;
-import ch.fhnw.webfr.flashcard.util.QuestionnaireInitializer;
 
 @SuppressWarnings("serial")
+@WebServlet(urlPatterns = {"/app/*"})
 public class BasicServlet extends HttpServlet {
 	/*
 	 * Attention: This repository will be used by all clients, concurrency
@@ -87,7 +88,8 @@ public class BasicServlet extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
-		questionnaireRepository = new QuestionnaireInitializer().initRepoWithTestData();
+		questionnaireRepository = (QuestionnaireRepository) config.getServletContext()
+				.getAttribute("questionnaireRepository");
 	}
 
 	public PrintWriter getWriter() { return writer; }
