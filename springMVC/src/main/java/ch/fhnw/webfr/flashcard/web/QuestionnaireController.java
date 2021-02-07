@@ -70,4 +70,35 @@ public class QuestionnaireController {
 			return "404";
 		}
 	}
+
+	@GetMapping(value = "/{id}", params = "form")
+	public String updateForm(@PathVariable String id, Model model) {
+		Optional<Questionnaire> question = questionnaireRepository.findById(id);
+		if (question.isPresent()) {
+			model.addAttribute("questionnaire", question.get());
+			return "questionnaires/update";
+		} else {
+			logger.warn("Could not find questionnaire with id=" + id);
+			return "404";
+		}
+	}
+
+	@PutMapping("/{id}")
+	public String update(@PathVariable String id, @Valid Questionnaire questionnaire,
+						 BindingResult bindingResult, Model model){
+		if (bindingResult.hasErrors()) {
+			logger.debug("Errors: " + bindingResult.getAllErrors());
+			return "questionnaires/update";
+		}
+
+		Optional<Questionnaire> question = questionnaireRepository.findById(id);
+		if (question.isPresent()) {
+			Questionnaire oldQ = question.get();
+			oldQ.setDescription(questionnaire.getDescription());
+			oldQ.setTitle(questionnaire.getTitle());
+			logger.debug("update" + oldQ);
+			questionnaireRepository.save(oldQ);
+		}
+		return "redirect:/questionnaires";
+	}
 }
