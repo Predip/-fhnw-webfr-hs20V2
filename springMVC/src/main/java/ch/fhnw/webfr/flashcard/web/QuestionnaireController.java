@@ -7,10 +7,13 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,5 +44,21 @@ public class QuestionnaireController {
 			logger.warn("Could not find questionnaire with id=" + id);
 			return "404";
 		}
+	}
+
+	@GetMapping(params = "form")
+	public String getForm(Model model) {
+		Questionnaire questionnaire = new Questionnaire();
+		logger.debug("open Form with new " + questionnaire);
+		model.addAttribute("questionnaire", questionnaire);
+		return "questionnaires/create";
+	}
+
+	@PostMapping
+	public String create(@Valid Questionnaire questionnaire, BindingResult bindingResult){
+		if (bindingResult.hasErrors()) return "questionnaires/create";
+		logger.debug("new" + questionnaire);
+		questionnaireRepository.save(questionnaire);
+		return "redirect:/questionnaires";
 	}
 }

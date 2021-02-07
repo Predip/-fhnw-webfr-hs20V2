@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html th:replace="~{layout :: maincontent(~{::section})}" xmlns:th="http://www.w3.org/1999/xhtml">
 <section>
-    <a class="btn btn-success float-right" href="?form">
-        Add Questionnaire
-    </a>
+    <a class="btn btn-success float-right" href="?form">Add Questionnaire</a>
     <h3>Frageb&ouml;gen</h3>
     <div th:if="${questionnaires.isEmpty()}">
         <h2 style="text-align: center">No Questionnaires found</h2>
