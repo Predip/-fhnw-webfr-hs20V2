@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/questionnaires")
@@ -43,13 +44,13 @@ public class QuestionnaireController {
 	}
 
 	@GetMapping("/{id}")
-	public void findById(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		Questionnaire question = questionnaireRepository.findById(id);
+	public void findById(@PathVariable String id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		Optional<Questionnaire> question = questionnaireRepository.findById(id);
 		setWriter(response);
 		writer.append("<h3>Question</h3>");
-		if (question != null) {
-			writer.append("<h4>").append(question.getTitle()).append("</h4>");
-			writer.append("<p>").append(question.getDescription()).append("</p>");
+		if (question.isPresent()) {
+			writer.append("<h4>").append(question.get().getTitle()).append("</h4>");
+			writer.append("<p>").append(question.get().getDescription()).append("</p>");
 			logger.debug("Found questionnaire with id=" + id);
 		} else {
 			writer.append("<p>no questions found</p>");
