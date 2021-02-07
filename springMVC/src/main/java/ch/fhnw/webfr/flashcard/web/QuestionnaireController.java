@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -60,5 +57,17 @@ public class QuestionnaireController {
 		logger.debug("new" + questionnaire);
 		questionnaireRepository.save(questionnaire);
 		return "redirect:/questionnaires";
+	}
+
+	@DeleteMapping("/{id}")
+	public String delete(@PathVariable String id) {
+		Optional<Questionnaire> question = questionnaireRepository.findById(id);
+		if (question.isPresent()) {
+			questionnaireRepository.deleteById(id);
+			return "redirect:/questionnaires";
+		} else {
+			logger.warn("Could not find questionnaire with id=" + id);
+			return "404";
+		}
 	}
 }
