@@ -36,3 +36,21 @@ bin/
 .DS_Store
 ### Log file ###
 *.log
+**/*.backup.*
+**/*.back.*
+### Node.js ###
+.eslintcache
+# dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# misc
+.DS_*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
