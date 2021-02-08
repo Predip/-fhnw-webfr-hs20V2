@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Button } from 'reactstrap';
 
 class App extends Component {
   constructor(props) {
@@ -18,18 +19,29 @@ class App extends Component {
       "Bombur",
     ];
     this.state = {
-      index: 0,
+        index: 0,
     };
     this.tick = this.tick.bind(this);
-    setInterval(this.tick, 1000);
+    this.reset = this.reset.bind(this);
   }
   tick() {
     const newIndex = (this.state.index + 1) % this.names.length;
     this.setState({ index: newIndex });
   }
+  reset() {
+    this.setState({ counter: 0 });
+  }
   render() {
     return (
-        <h1>{this.props.message} {this.names[this.state.index]}</h1>
+        <div>
+          <div className="jumbotron">
+            <h1>{this.props.message} {this.names[this.state.index]}</h1>
+          </div>
+
+          <Button color="primary" onClick={this.tick}>INCR</Button>
+          <Button color="secondary" onClick={this.reset}>REFRESH</Button>
+        </div>
+
     );
   }
 }
