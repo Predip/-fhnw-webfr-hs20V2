@@ -21,15 +21,20 @@ class App extends Component {
     this.state = {
         index: 0,
     };
-    this.tick = this.tick.bind(this);
-    this.reset = this.reset.bind(this);
+    setInterval(this.tick, 1000);
   }
-  tick() {
+  componentDidMount() {
+    this.timer = setInterval(this.tick, 1000);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+  tick = () => {
     const newIndex = (this.state.index + 1) % this.names.length;
     this.setState({ index: newIndex });
   }
-  reset() {
-    this.setState({ counter: 0 });
+  reset = () => {
+    this.setState({ index: 0 });
   }
   render() {
     return (
@@ -38,10 +43,8 @@ class App extends Component {
             <h1>{this.props.message} {this.names[this.state.index]}</h1>
           </div>
 
-          <Button color="primary" onClick={this.tick}>INCR</Button>
           <Button color="secondary" onClick={this.reset}>REFRESH</Button>
         </div>
-
     );
   }
 }
