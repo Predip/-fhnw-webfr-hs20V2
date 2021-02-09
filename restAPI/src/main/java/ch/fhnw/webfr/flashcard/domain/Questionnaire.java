@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Objects;
 
 @Document(collection = "questionnaires")
 public class Questionnaire {
@@ -39,5 +40,16 @@ public class Questionnaire {
 
 	public String getDescription() {
 		return description;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Questionnaire))
+			return false;
+		Questionnaire questionnaire = (Questionnaire) o;
+		return Objects.equals(this.id, questionnaire.id) && Objects.equals(this.title, questionnaire.title)
+				&& Objects.equals(this.description, questionnaire.description);
 	}
 }
