@@ -4,7 +4,16 @@ import App from './App'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
 
-const reducer = (state, action) => state
+const reducer = (state, action) => {
+    switch(action.type) {
+        case 'UPDATE_FILTER_TERM': { 
+             return  { ...state, filterTerm: action.filterTerm } 
+        }
+        default: { 
+             return state
+        }
+    }
+}
 
 const initialState = {
     movies: [
@@ -17,7 +26,8 @@ const initialState = {
         { rank: 7, title: 'Schindlers List', director: 'Steven Spielberg', year: 1993 },
         { rank: 8, title: '12 Angry Men', director: 'Sidney Lumet', year: 1957 },
         { rank: 9, title: 'Fight Club', director: 'David Fincher', year: 1999 }
-    ]
+    ],
+    filterTerm: ''
 }
 
 const store = createStore(reducer, initialState)
