@@ -1,19 +1,15 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App'
+import React from 'react'
+import _ from 'lodash'
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
+import ReactDOM from 'react-dom'
+import App from './App'
 
-const reducer = (state, action) => {
-    switch(action.type) {
-        case 'UPDATE_FILTER_TERM': { 
-             return  { ...state, filterTerm: action.filterTerm } 
-        }
-        default: { 
-             return state
-        }
-    }
+const ACTIONS = {
+    'UPDATE_FILTER_TERM': (state, action) => ({ ...state, filterTerm: action.filterTerm })
 }
+
+const reducer = (state, action) => _.get(ACTIONS, action.type, _.identity)(state, action)
 
 const initialState = {
     movies: [
@@ -32,9 +28,4 @@ const initialState = {
 
 const store = createStore(reducer, initialState)
 
-ReactDOM.render(
-    <Provider store={ store }>
-        <App />
-    </Provider>, 
-    document.getElementById('app')
-)
+ReactDOM.render(<Provider store={ store }><App /></Provider>, document.getElementById('app'))
