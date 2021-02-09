@@ -1,26 +1,29 @@
 import React from 'react';
 import { Table } from 'reactstrap';
+import _ from "lodash";
 import QuestionnaireTableElement from './QuestionnaireTableElement';
 
 const textStyle = {
     verticalAlign: 'middle'
 };
 
-const QuestionnaireTable = ({questionnaires}) => (
+const QuestionnaireTable = ({questionnaires, update, remove}) => (
     <Table class="table table-condensed table-hover">
         <thead>
             <tr>
                 <th colSpan="1" style={textStyle}>ID</th>
                 <th colSpan="3" style={textStyle}>Title</th>
                 <th colSpan="10" style={textStyle}>Beschreibung</th>
-                <th colSpan="1" style={textStyle}>Delete</th>
-                <th colSpan="1" style={textStyle}>Show</th>
-                <th colSpan="1" style={textStyle}>Update</th>
+                <th colSpan="1" style={textStyle}>Aktionen</th>
             </tr>
         </thead>
         <tbody>
-            { questionnaires.map((questionnaire) =>
-                    <QuestionnaireTableElement key={questionnaire.id} questionnaire={questionnaire} />)
+            { _.map(questionnaires, questionnaire =>
+                <QuestionnaireTableElement
+                    key={questionnaire.id}
+                    questionnaire={questionnaire}
+                    update={ update }
+                    remove={ remove } />)
             }
         </tbody>
     </Table>
