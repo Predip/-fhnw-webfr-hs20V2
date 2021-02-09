@@ -8,7 +8,7 @@ const textStyle = {
 };
 
 const QuestionnaireTable = ({questionnaires, update, remove}) => (
-    <Table class="table table-condensed table-hover">
+    <Table className="table table-condensed table-hover">
         <thead>
             <tr>
                 <th colSpan="1" style={textStyle}>ID</th>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Col, Input } from 'reactstrap';
 
-const QuestionnaireShowDialog = props => {
+const QuestionnaireCreateDialog = props => {
     let [showModal, setShowModal] = useState(false);
     let [qs, setQuestionnaire] = useState({ title: '', description: '' })
 
@@ -44,4 +44,4 @@ const QuestionnaireShowDialog = props => {
     );
 }
 
-export default QuestionnaireShowDialog;
+export default QuestionnaireCreateDialog;
