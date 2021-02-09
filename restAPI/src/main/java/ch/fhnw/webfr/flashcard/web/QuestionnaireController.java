@@ -2,11 +2,12 @@ package ch.fhnw.webfr.flashcard.web;
 
 import ch.fhnw.webfr.flashcard.domain.Questionnaire;
 import ch.fhnw.webfr.flashcard.persistence.QuestionnaireRepository;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,91 +15,67 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@CrossOrigin
+@RestController
 @RequestMapping("/questionnaires")
 public class QuestionnaireController {
-	private static final Log logger = LogFactory.getLog(QuestionnaireController.class);
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private QuestionnaireRepository questionnaireRepository;
 
 	@GetMapping
-	public String findAll(Model model) {
-		List<Questionnaire> questionnaires = questionnaireRepository.findAll();
+	public ResponseEntity<List<Questionnaire>> findAll() {
+		Sort sort = Sort.by(Sort.Direction.ASC, "id");
+		List<Questionnaire> questionnaires = questionnaireRepository.findAll(sort);
 		logger.debug("Found " + questionnaires.size() + " questionnaires");
-		model.addAttribute("questionnaires", questionnaires);
-		return "questionnaires/list";
+		return new ResponseEntity<>(questionnaires, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
-	public String findById(@PathVariable String id, Model model) {
+	public ResponseEntity<Questionnaire> findById(@PathVariable String id) {
 		Optional<Questionnaire> question = questionnaireRepository.findById(id);
 		if (question.isPresent()) {
 			logger.debug("Found questionnaire with id=" + id);
-			model.addAttribute("questionnaire", question.get());
-			return "questionnaires/show";
-		} else {
-			logger.warn("Could not find questionnaire with id=" + id);
-			return "404";
+			return new ResponseEntity<>(question.get(), HttpStatus.OK);
 		}
-	}
-
-	@GetMapping(params = "form")
-	public String getForm(Model model) {
-		Questionnaire questionnaire = new Questionnaire();
-		logger.debug("open Form with new " + questionnaire);
-		model.addAttribute("questionnaire", questionnaire);
-		return "questionnaires/create";
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 	@PostMapping
-	public String create(@Valid Questionnaire questionnaire, BindingResult bindingResult){
-		if (bindingResult.hasErrors()) return "questionnaires/create";
-		logger.debug("new" + questionnaire);
-		questionnaireRepository.save(questionnaire);
-		return "redirect:/questionnaires";
+	public ResponseEntity<Questionnaire> create(@Valid @RequestBody Questionnaire questionnaire, BindingResult bindingResult){
+		if (bindingResult.hasErrors()) return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
+		questionnaire = questionnaireRepository.save(questionnaire);
+		logger.debug("Created questionnaire with id=" + questionnaire.getId());
+		return new ResponseEntity<>(questionnaire, HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/{id}")
-	public String delete(@PathVariable String id) {
+	public ResponseEntity<String> delete(@PathVariable String id) {
 		Optional<Questionnaire> question = questionnaireRepository.findById(id);
 		if (question.isPresent()) {
 			questionnaireRepository.deleteById(id);
-			return "redirect:/questionnaires";
-		} else {
-			logger.warn("Could not find questionnaire with id=" + id);
-			return "404";
+			logger.debug("Deleted questionnaire with id=" + id);
+			return new ResponseEntity<>(HttpStatus.OK);
 		}
-	}
-
-	@GetMapping(value = "/{id}", params = "form")
-	public String updateForm(@PathVariable String id, Model model) {
-		Optional<Questionnaire> question = questionnaireRepository.findById(id);
-		if (question.isPresent()) {
-			model.addAttribute("questionnaire", question.get());
-			return "questionnaires/update";
-		} else {
-			logger.warn("Could not find questionnaire with id=" + id);
-			return "404";
-		}
+		logger.debug("Could not find questionnaire with id=" + id);
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 	@PutMapping("/{id}")
-	public String update(@PathVariable String id, @Valid Questionnaire questionnaire,
-						 BindingResult bindingResult, Model model){
-		if (bindingResult.hasErrors()) {
-			logger.debug("Errors: " + bindingResult.getAllErrors());
-			return "questionnaires/update";
-		}
-
+	public ResponseEntity<Questionnaire> update(@PathVariable String id, @Valid @RequestBody Questionnaire questionnaire,
+						 BindingResult bindingResult){
+		if (bindingResult.hasErrors()) return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
 		Optional<Questionnaire> question = questionnaireRepository.findById(id);
 		if (question.isPresent()) {
 			Questionnaire oldQ = question.get();
-			oldQ.setDescription(questionnaire.getDescription());
-			oldQ.setTitle(questionnaire.getTitle());
-			logger.debug("update" + oldQ);
+			if (questionnaire.getDescription() != null) oldQ.setDescription(questionnaire.getDescription());
+			if (questionnaire.getTitle() != null) oldQ.setTitle(questionnaire.getTitle());
 			questionnaireRepository.save(oldQ);
+			logger.debug("Updated questionnaire with id=" + oldQ.getId());
+			return new ResponseEntity<>(oldQ, HttpStatus.OK);
 		}
-		return "redirect:/questionnaires";
+		logger.debug("No questionnaire with id=" + id + " found");
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 }
